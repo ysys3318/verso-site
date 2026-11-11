@@ -1,0 +1,308 @@
+/* Verso support and privacy pages. Colors are the app's tokens (VersoCore Palette): the navy
+   cover (CoverColor.navy), the cover's paper label (CoverPalette), the page paper and its ruling
+   (PaperPalette day/night), the interface canvas and secondary text (InterfacePalette; the secondary text is its increased-contrast step, so it stays AA over a ruled line) and the
+   terracotta ribbon (CoverColor.terracotta). As in the app, paper stays light in Dark Mode and
+   only dims to the night paper. Logical properties only, so a right-to-left page can reuse it. */
+
+:root {
+  color-scheme: light dark;
+  --desk: #f2f2f7;
+  --desk-text: #3a3e45;
+  --desk-muted: #636870;
+  --desk-link: #2b4c7e;
+  --cover: #23395b;
+  --cover-text: #ffffff;
+  --stitch: rgb(255 255 255 / 0.28);
+  --plate: #f5f0e0;
+  --plate-ink: #29292b;
+  --paper: #fbf8f1;
+  --rule: rgb(169 187 209 / 0.4);
+  --margin-rule: rgb(222 156 151 / 0.7);
+  --ink: #3a3e45;
+  --ink-soft: #4a4e55;
+  --accent: #2b4c7e;
+  --fill: #efeadf;
+  --ribbon: #a8553a;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.06);
+  --line: 1.75rem;
+  --sheet-pad: 3.25rem;
+  --margin-at: 2.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --desk: #121317;
+    --desk-text: #e7e8eb;
+    --desk-muted: #a6a9b0;
+    --desk-link: #93b8ec;
+    --cover: #2f4c7a;
+    --stitch: rgb(255 255 255 / 0.24);
+    --plate: #e4ded0;
+    --paper: #e4ddce;
+    --rule: rgb(149 166 187 / 0.45);
+    --margin-rule: rgb(201 137 132 / 0.7);
+    --ink: #33363c;
+    --ink-soft: #4a4e55;
+    --accent: #264470;
+    --fill: #d8d0bf;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px rgb(0 0 0 / 0.35);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--desk-text);
+  font: 1.0625rem/var(--line) -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+}
+
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+.skip {
+  position: absolute;
+  inset-inline-start: 1rem;
+  inset-block-start: -10rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  background: var(--plate);
+  color: var(--plate-ink);
+  font-weight: 600;
+  border-radius: 8px;
+}
+.skip:focus { inset-block-start: 1rem; }
+
+/* The cover: navy cloth with a darker spine and a stitched border, the paper label holding the
+   name. */
+.cover {
+  position: relative;
+  background: var(--cover);
+  color: var(--cover-text);
+  padding: 1.25rem 1rem 1rem;
+  overflow: hidden;
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 0.9rem;
+  background: rgb(0 0 0 / 0.18);
+}
+.cover-frame {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 1rem;
+  border: 1.5px dashed var(--stitch);
+  border-radius: 12px;
+  text-align: center;
+}
+.plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 0.6rem;
+  padding-inline: 0.75rem 1.4rem;
+  background: var(--plate);
+  color: var(--plate-ink);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 3px var(--plate), inset 0 0 0 4px rgb(41 41 43 / 0.25), 0 2px 6px rgb(0 0 0 / 0.25);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.plate img { border-radius: 10px; }
+.plate:focus-visible, .cover nav a:focus-visible { outline-color: var(--plate); }
+.cover nav ul {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cover nav a {
+  display: block;
+  padding: 0.3rem 0.9rem;
+  color: var(--cover-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+}
+.cover nav a:hover { background: rgb(255 255 255 / 0.12); }
+.cover nav a[aria-current="page"] { background: var(--plate); color: var(--plate-ink); }
+
+/* Paper sheets: ruled lines, the red margin rule, a page number. */
+main {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 0;
+  counter-reset: sheet;
+}
+.sheet {
+  position: relative;
+  counter-increment: sheet;
+  margin-block-end: 1.25rem;
+  padding-block: var(--line) calc(var(--line) * 2);
+  padding-inline: var(--sheet-pad) 1.75rem;
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px) var(--line));
+  background-position: 0 calc(var(--line) * 0.25);
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--margin-at);
+  inline-size: 1px;
+  background: var(--margin-rule);
+}
+.sheet::after {
+  content: counter(sheet);
+  position: absolute;
+  inset-block-end: calc(var(--line) * 0.5);
+  inset-inline: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.ribbon {
+  position: absolute;
+  inset-block-start: -0.35rem;
+  inset-inline-end: 1.75rem;
+  inline-size: 1.1rem;
+  block-size: 4.75rem;
+  background: var(--ribbon);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+h1, h2, h3, p, ul, ol, dl { margin-block: 0 var(--line); }
+h1 {
+  font-size: 2rem;
+  line-height: calc(var(--line) * 1.5);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding-inline-end: 2rem;
+}
+/* Section headings in the planner page's style: the shaded header band, uppercase and tracked. */
+h2 {
+  margin-inline-start: calc(var(--sheet-pad) * -1 + var(--margin-at) + 1px);
+  padding-inline: calc(var(--sheet-pad) - var(--margin-at) - 1px) 0.75rem;
+  background: var(--fill);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+h3 { font-size: 1.0625rem; color: var(--accent); margin-block-end: 0; }
+p, li { overflow-wrap: anywhere; }
+ul { padding-inline-start: 1.25rem; }
+li { margin-block: 0; }
+code { font: 0.95em ui-monospace, SFMono-Regular, Menlo, monospace; }
+.sheet > :last-child { margin-block-end: 0; }
+
+.lead { font-size: 1.15rem; color: var(--ink-soft); }
+.updated { color: var(--ink-soft); }
+
+/* The planner's "focus" box: the one thing to know first. */
+.summary {
+  margin-block: 0 var(--line);
+  padding-block: calc(var(--line) * 0.5);
+  padding-inline: 1rem;
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-inline-start-width: 6px;
+  border-radius: 6px;
+}
+.summary p { margin: 0; }
+.summary strong { color: var(--accent); }
+
+.contact-address {
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Feature groups: two columns on wide screens. */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  column-gap: 1.5rem;
+}
+.features ul { margin-block-end: var(--line); }
+
+/* Tables sit on plain paper so the ruling never runs through their text. */
+.table { margin-block-end: var(--line); background: var(--paper); box-shadow: 0 0 0 0.5rem var(--paper); }
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  background: var(--paper);
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+th, td {
+  padding: 0.6rem 0.65rem;
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--fill);
+}
+thead th {
+  background: var(--fill);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+tbody th { color: var(--accent); }
+
+.colophon {
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  padding: 0.5rem 1rem 2.5rem;
+  color: var(--desk-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.colophon a { color: var(--desk-link); }
+.colophon :focus-visible { outline-color: var(--desk-link); }
+
+@media (max-width: 40rem) {
+  :root { --sheet-pad: 2.25rem; --margin-at: 1.4rem; }
+  body { font-size: 1rem; }
+  h1 { font-size: 1.6rem; }
+  .sheet { padding-inline-end: 1.1rem; }
+  .ribbon { inset-inline-end: 1rem; }
+  .plate { font-size: 1.5rem; }
+  /* The table becomes one block per row, each cell under its column's label. */
+  table, thead, tbody, tr, th, td { display: block; }
+  thead { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+  tr { border-block-end: 2px solid var(--fill); padding-block: 0.4rem; }
+  th, td { border: 0; padding-block: 0.25rem; padding-inline: 0; }
+  td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cover nav a { transition: background-color 0.15s ease; }
+}
